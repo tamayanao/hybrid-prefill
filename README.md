@@ -2,6 +2,8 @@
 
 [English](README.en.md)
 
+![実機構成とTTFT比較。Mac Studio (M3 Ultra 512GB) と RTX 5090 / DDR5 128GB 搭載PC。](docs/hybrid-prefill-ja.png)
+
 Mac Studio（M3 Ultra）とRTX 5090搭載Windows PCで、DeepSeek V4.1 Flashの入力処理（Prefill）を分担します。Macがモデル全体とKVキャッシュを保持し、RTX 5090が先頭の層を処理します。最初の3層はGPUに常駐し、追加の層のexpert重みはピン留めしたPC側のRAMからGPUへ転送します。
 
 起動時にWindowsの搭載RAM、WSL2の総RAMと利用可能RAMを取得します。最小値から12 GiBを残し、チェックポイントのヘッダーから算出した重みサイズで3〜9層を選びます。既定のチャンク上限は2,048トークンです。8,192トークンに引き上げた試験ではVRAM不足により担当層が減りました。

@@ -2,6 +2,8 @@
 
 [日本語](README.md)
 
+![Test hardware and TTFT comparison for Mac Studio (M3 Ultra 512GB) and an RTX 5090 / DDR5 128GB PC.](docs/hybrid-prefill-en.png)
+
 Hybrid Prefill splits DeepSeek V4.1 Flash prefill between a Mac Studio (M3 Ultra) and a Windows PC with an RTX 5090. The Mac keeps the full model and KV cache. The RTX 5090 processes the first layers, keeping three layers resident and streaming the expert weights for additional layers from pinned PC RAM.
 
 At startup the launcher reads installed Windows RAM, total WSL2 RAM, and available WSL2 RAM. It reserves 12 GiB from the smallest of the three and uses weight sizes from the checkpoint headers to select 3–9 layers. The default chunk limit is 2,048 tokens. At 8,192 tokens, VRAM pressure reduced the number of layers the GPU could process in testing.
