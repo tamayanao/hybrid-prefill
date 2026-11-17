@@ -2,7 +2,7 @@
 
 [日本語](README.md) · [Distribution ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![Measured v0.0.2 8K, 32K and 64K results with reference values from the supplied figure (Japanese)](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
+![Measured v0.0.2 8K, 32K and 64K results with existing reference values (Japanese)](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
 
 Hybrid Prefill splits DeepSeek V4.1 Flash prefill between a Mac Studio and a Windows PC with an RTX 5090. The Mac keeps the full model and KV cache and handles decoding. The RTX processes the first layers, keeping three resident and streaming the additional expert weights from pinned WSL2 RAM.
 

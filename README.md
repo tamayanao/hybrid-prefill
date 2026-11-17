@@ -2,7 +2,7 @@
 
 [English](README.en.md) · [配布ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![v0.0.2の8K・32K・64K実測と元図の参考値との比較](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
+![v0.0.2の8K・32K・64K実測と既存の参考値との比較](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
 
 DeepSeek V4.1 Flashの入力処理を、Mac StudioとRTX 5090搭載Windows PCで分担します。Macがモデル全体とKVキャッシュを保持して応答を生成し、RTXが先頭の層を処理します。最初の3層をGPUに常駐させ、追加層のExpert重みをWSL2のピン留めRAMから転送します。
 
