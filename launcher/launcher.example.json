@@ -1,0 +1,14 @@
+{
+  "pc_host": "CHANGE-ME",
+  "pc_user": "CHANGE-ME",
+  "ssh_key": "",
+  "wsl_distribution": "Ubuntu-24.04",
+  "omlx_python": "CHANGE-ME",
+  "model_directory": "CHANGE-ME",
+  "model_id": "DeepSeek-V4.1-Flash-1017-oQ4e-mtp",
+  "helper_node_id": "CHANGE-ME",
+  "max_layers": 9,
+  "chunk_tokens": 2048,
+  "ssh_host_key_alias": "",
+  "copy_missing_model_files": false
+}

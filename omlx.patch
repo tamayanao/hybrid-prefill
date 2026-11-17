@@ -1,0 +1,99 @@
+diff --git a/omlx/admin/routes.py b/omlx/admin/routes.py
+index 5b0faa2..e439ee3 100644
+--- a/omlx/admin/routes.py
++++ b/omlx/admin/routes.py
+@@ -429,6 +429,7 @@ class ModelSettingsRequest(BaseModel):
+     deepseek_v41_ced_prefill_enabled: bool | None = None
+     prefill_helper_node_id: str | None = None
+     prefill_helper_layers: int | None = None
++    prefill_helper_chunk_tokens: int | None = Field(default=None, ge=1024, le=8192, multiple_of=1024)
+     thinking_budget_enabled: bool | None = None
+     thinking_budget_tokens: int | None = None
+     gpu_power_limit_w: int | None = None
+@@ -3146,6 +3147,8 @@ async def update_model_settings(
+                 status_code=400, detail="prefill_helper_layers must be at least 1"
+             )
+         current_settings.prefill_helper_layers = layers
++    if "prefill_helper_chunk_tokens" in sent:
++        current_settings.prefill_helper_chunk_tokens = request.prefill_helper_chunk_tokens
+     if "qwen4_ple_ssd_offload" in sent:
+         is_qwen4_exp = (entry.config_model_type or "").replace(
+             "-", "_"
+@@ -3616,7 +3619,11 @@ async def update_model_settings(
+ 
+     # Persist settings
+     settings_manager.set_settings(model_id, current_settings)
+-    helper_fields = {"prefill_helper_node_id", "prefill_helper_layers"}
++    helper_fields = {
++        "prefill_helper_node_id",
++        "prefill_helper_layers",
++        "prefill_helper_chunk_tokens",
++    }
+     if not _oq_a8_kernels_available():
+         # A8 here reaches only the helper's layers.
+         helper_fields |= {"a8_prefill_enabled", "a8_prefill_min_tokens"}
+diff --git a/omlx/engine/vlm.py b/omlx/engine/vlm.py
+index abf105c..8f3f62e 100644
+--- a/omlx/engine/vlm.py
++++ b/omlx/engine/vlm.py
+@@ -2937,6 +2937,10 @@ class VLMBatchedEngine(BaseEngine):
+     def configure_prefill_helper(self, settings: Any) -> None:
+         """Apply the model's Prefill Accelerator choice without a reload."""
+         if self._prefill_helper is not None:
++            scheduler = self._engine.engine.scheduler
++            scheduler.prefill_helper_chunk_tokens = getattr(
++                settings, "prefill_helper_chunk_tokens", None
++            )
+             self._prefill_helper.configure(
+                 getattr(settings, "prefill_helper_node_id", None),
+                 getattr(settings, "prefill_helper_layers", None),
+diff --git a/omlx/model_settings.py b/omlx/model_settings.py
+index 08fbd73..3ce9c95 100644
+--- a/omlx/model_settings.py
++++ b/omlx/model_settings.py
+@@ -445,6 +445,7 @@ class ModelSettings:
+     # measured speed). Applied without reloading the model.
+     prefill_helper_node_id: Optional[str] = None
+     prefill_helper_layers: Optional[int] = None
++    prefill_helper_chunk_tokens: Optional[int] = None
+     # Recast the checkpoint's bfloat16 leaves (scales, norms, embeddings) to
+     # float16 after load, so the forward runs on the GPU's native float16 path
+     # instead of the emulated bfloat16 one. Quantized payloads are untouched.
+diff --git a/omlx/scheduler.py b/omlx/scheduler.py
+index d567696..dd192c9 100644
+--- a/omlx/scheduler.py
++++ b/omlx/scheduler.py
+@@ -2344,6 +2344,7 @@ class Scheduler:
+         self._prefill_states: dict[str, _PrefillState] = {}
+         # Prefill Accelerator session for this model (see attach_prefill_helper).
+         self._prefill_helper = None
++        self.prefill_helper_chunk_tokens: int | None = None
+         self._prefill_helper_retry: Callable[[], None] | None = None
+         # Packed prefill: "" once the model is known to be unsupported.
+         self._packed_prefill_family: str | None = None
+@@ -6947,9 +6948,12 @@ class Scheduler:
+         """Chunk sizes for the whole prefill, as _plan_prefill_chunk cuts them
+         without the contended cap. The helper computes ahead on this grid."""
+         grid, processed = [], 0
++        chunk_cap = getattr(self, "prefill_helper_chunk_tokens", None)
+         remaining = int(state.tokens_remaining.shape[1])
+         while remaining > 0:
+             n = min(self._base_prefill_step_size(processed, remaining), remaining)
++            if chunk_cap:
++                n = min(n, chunk_cap)
+             cache_tokens = state.base_size + processed
+             if state.boundary_enabled and state.block_size > 0:
+                 n = clamp_prefill_chunk_to_boundary(
+diff --git a/tests/test_prefill_helper.py b/tests/test_prefill_helper.py
+index e94a655..15a997e 100644
+--- a/tests/test_prefill_helper.py
++++ b/tests/test_prefill_helper.py
+@@ -526,6 +526,8 @@ def test_helper_grid_stops_at_blocks_and_tails():
+     )
+     # Cached prefix of 5: the first block ends at 16, the tail at 29.
+     assert Scheduler._helper_chunk_grid(sched, state) == [8, 3, 8, 5, 3, 3]
++    sched.prefill_helper_chunk_tokens = 4
++    assert Scheduler._helper_chunk_grid(sched, state) == [4, 4, 3, 4, 4, 4, 1, 3, 3]
+ 
+ 
+ def test_auto_split_balances_measured_speed():
