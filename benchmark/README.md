@@ -1,5 +1,9 @@
 # Benchmark / 計測データ
 
+[v0.0.2 paired 64K measurement / 64K交互試験](v0.0.2/64k-paired.json)
+
+## v0.0.1
+
 Mac Studio (M3 Ultra) / RTX 5090 / 5 GbE / SSH forwarding / DeepSeek V4.1 Flash oQ4e / 2,048-token hybrid chunks. Both 8,405-token conditions use one warm-up and three measured requests. Cache storage is disabled. The long-context samples are single development runs. TTFT is the streaming client time to first nonempty output.
 
 両方の8,405トークン条件はウォームアップ1回と計測3回。キャッシュ保存は無効。長文は開発中の各1回の予備測定です。TTFTはストリーミングAPIで最初の空ではない出力を受け取るまでの時間です。

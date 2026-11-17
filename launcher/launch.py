@@ -17,12 +17,13 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 from uuid import UUID
 
-from ram_plan import GIB, MAX_VALIDATED_LAYERS, RESIDENT_LAYERS, choose_layers, expert_sizes, read_meminfo
+from memory_guard import MemoryGuard
+from ram_plan import GIB, HELPER_MEMORY, MAX_VALIDATED_LAYERS, RESIDENT_LAYERS, choose_layers, expert_sizes, read_meminfo
 
 
 PORT = 18880
 CONTAINER = "hybrid-prefill-helper"
-APP_IMAGE = "hybrid-prefill-helper:0.0.1"
+APP_IMAGE = "hybrid-prefill-helper:0.0.2"
 AUTH_SCOPE = "io.hybridprefill.package"
 
 
@@ -74,6 +75,8 @@ def config_at(file, *, pairing=False):
         raise ValueError("chunk_tokens は2048、4096、8192から選んでください。")
     if type(config.get("copy_missing_model_files", False)) is not bool:
         raise ValueError("copy_missing_model_files は true または false を指定してください。")
+    if type(config.get("reuse_pooled_kv", True)) is not bool:
+        raise ValueError("reuse_pooled_kv は true または false を指定してください。")
     if config.get("ssh_key"):
         config["ssh_key"] = Path(config["ssh_key"]).expanduser().resolve(strict=True)
         if not config["ssh_key"].is_file():
@@ -162,6 +165,9 @@ def run(config, config_file, *, pairing=False):
         raise RuntimeError("配布パックのhelperをWindows側にセットアップしてください。")
     if (metadata["Config"].get("Labels") or {}).get(AUTH_SCOPE) != "1":
         raise RuntimeError("専用helperコンテナを識別できません。")
+    limits = metadata["HostConfig"]
+    if limits.get("Memory") != HELPER_MEMORY or limits.get("MemorySwap") != HELPER_MEMORY:
+        raise RuntimeError("v0.0.2の専用helperを68 GiB上限でセットアップしてください。")
     running = "true" if metadata["State"]["Running"] else "false"
     if running != "false":
         raise RuntimeError("専用helperが既に稼働しています。先に停止してください。")
@@ -173,7 +179,7 @@ def run(config, config_file, *, pairing=False):
     ))
     memory = read_meminfo(remote(f"{wsl} cat /proc/meminfo"))
     sizes = expert_sizes(config["model_directory"] / model, config["max_layers"])
-    plan = choose_layers(physical_bytes=physical, wsl_total_bytes=memory["MemTotal"],
+    plan = choose_layers(physical_bytes=min(physical, HELPER_MEMORY), wsl_total_bytes=memory["MemTotal"],
                          wsl_available_bytes=memory["MemAvailable"],
                          layer_bytes=sizes, maximum=config["max_layers"])
     layers = plan.layers
@@ -197,6 +203,8 @@ def run(config, config_file, *, pairing=False):
             stdin=subprocess.DEVNULL,
             env={**os.environ, "HOME": str(isolated_home),
                  "HYBRID_PREFILL_LAYERS": str(layers),
+                 "HYBRID_PREFILL_MAC_BF16_KV": "1",
+                 "HYBRID_PREFILL_MAC_REUSE_POOLED_KV": "1" if config.get("reuse_pooled_kv", True) else "0",
                  "HYBRID_PREFILL_CHUNK_TOKENS": str(config["chunk_tokens"])},
         )
         cleanup.callback(stop_process, server)
@@ -240,6 +248,8 @@ def run(config, config_file, *, pairing=False):
             temp.replace(config_file)
             label("ペアリング完了。Macアプリから起動できます。")
             return
+        guard = MemoryGuard([*ssh, target], lambda: remote(f"{wsl} cat /proc/meminfo", 10), label)
+        cleanup.callback(guard.close)
         request(f"/admin/api/models/{model}/settings", key, method="PUT", data={
             "prefill_helper_node_id": config["helper_node_id"],
             "prefill_helper_layers": layers, "max_context_window": 70000,
@@ -263,6 +273,8 @@ def run(config, config_file, *, pairing=False):
                 raise RuntimeError(f"helper準備失敗: {status} {value.get('reason', '')}")
             return status == "ready" and value.get("layers") == layers
         wait_for(configured, "GPU層の準備", timeout=1200, processes=processes)
+        wait_for(guard.ready, "安全なメモリ余裕の回復", timeout=90, processes=processes)
+        guard.active = True
         label(f"API: http://127.0.0.1:{PORT}/v1")
         label("READY")
         while all(p.poll() is None for p in processes):
@@ -274,7 +286,7 @@ def main():
     os.umask(0o077)
     signal.signal(signal.SIGTERM, stop_requested)
     signal.signal(signal.SIGINT, stop_requested)
-    label("Hybrid Prefill v.0.0.1 検証テスト版")
+    label("Hybrid Prefill v0.0.2 検証テスト版")
     if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != "--pair"):
         raise ValueError("Usage: launch.py CONFIG [--pair]")
     pairing = len(sys.argv) == 3

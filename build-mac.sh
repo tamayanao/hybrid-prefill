@@ -8,5 +8,5 @@ trap 'rm -rf "$cache"' EXIT
 xcrun swiftc -module-cache-path "$cache" -target arm64-apple-macos14.0 -O -parse-as-library app/Workflow.swift \
     -o "$root/MacOS/HybridPrefill"
 cp app/Info.plist "$root/"
-cp launcher/*.py launcher/launcher.example.json README.md README.en.md "$root/Resources/"
+cp launcher/*.py launcher/windows-memory.ps1 launcher/launcher.example.json README.md README.en.md "$root/Resources/"
 codesign --force --sign - "$root/.."

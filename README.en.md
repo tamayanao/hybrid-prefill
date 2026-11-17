@@ -1,27 +1,27 @@
-# Hybrid Prefill v.0.0.1 (Verification Test Build)
+# Hybrid Prefill v0.0.2 (Experimental Release)
 
-[日本語](README.md)
+[日本語](README.md) · [Distribution ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![Test hardware and TTFT comparison for Mac Studio (M3 Ultra 512GB) and an RTX 5090 / DDR5 128GB PC.](docs/hybrid-prefill-en.png)
+![How the Mac Studio M3 Ultra 512 GB and RTX 5090 / DDR5 128 GB PC split work, with 64K TTFT for Mac only, 9 layers, and 11 layers](docs/hybrid-prefill-v0.0.2-en.png)
 
-Hybrid Prefill splits DeepSeek V4.1 Flash prefill between a Mac Studio (M3 Ultra) and a Windows PC with an RTX 5090. The Mac keeps the full model and KV cache. The RTX 5090 processes the first layers, keeping three layers resident and streaming the expert weights for additional layers from pinned PC RAM.
+Hybrid Prefill splits DeepSeek V4.1 Flash prefill between a Mac Studio and a Windows PC with an RTX 5090. The Mac keeps the full model and KV cache and handles decoding. The RTX processes the first layers, keeping three resident and streaming the additional expert weights from pinned WSL2 RAM.
 
-At startup the launcher reads installed Windows RAM, total WSL2 RAM, and available WSL2 RAM. It reserves 12 GiB from the smallest of the three and uses weight sizes from the checkpoint headers to select 3–9 layers. The default chunk limit is 2,048 tokens. At 8,192 tokens, VRAM pressure reduced the number of layers the GPU could process in testing.
+At startup, the launcher uses installed Windows RAM, total and available WSL2 RAM, and the dedicated helper's 68 GiB limit. It reserves 12 GiB and selects 3–11 layers using weight sizes from checkpoint headers. The validated performance configuration uses 11 layers, 32 Expert Banks, 2,048-token chunks, fully pinned expert weights, and prefetch off.
 
 ## Measurements on real hardware
 
-| Input tokens | Configuration | Time to first token |
-| --- | --- | ---: |
-| 8,405 | Mac only, median of three runs after warm-up | 9.920 s |
-| 8,405 | Verification launcher, nine layers, median of three runs after warm-up | 6.522 s |
-| 32,773 | Nine layers, one preliminary run | 21.714 s |
-| 65,541 | Nine layers, one preliminary run | 42.590 s |
+The diagram uses separate runs of the same 65,541-token prompt. The Mac-only point is one pilot run with an 8,192-token chunk. The 9-layer and 11-layer points are medians of five runs each with 2,048-token chunks. [TTFT measurements for all three configurations](benchmark/v0.0.2/64k-ttft-comparison.json)
 
-Time to first token was 34.3% shorter on the 8,405-token input. Each long-input result is from one run. The 32,773-token output differed from the eight-layer trial. See [benchmark](benchmark) for conditions and data.
+| 65,541 tokens, same 11-layer configuration | Median prefill | Median TTFT | Prefill throughput |
+| --- | ---: | ---: | ---: |
+| BF16 scratch | 34.640 s | 34.927 s | 1,892.1 tok/s |
+| BF16 scratch with pooled KV reuse | **33.811 s** | **34.098 s** | **1,938.4 tok/s** |
 
-## Verification scope
+Measured on a Mac Studio (M3 Ultra, 512 GB) and an RTX 5090 PC (32 GB VRAM, 128 GB DDR5) over 5GbE with a 96 GB WSL2 limit. Each mode had one warm-up and five measured runs. All 12 outputs matched, and all 396 chunks retained the 11-layer cut. The experiment recorded minimums of 14.90 GiB of Windows commit headroom, 39.75 GiB of available Windows RAM, and 30.20 GiB of available WSL2 RAM during measurements. [Measurement data](benchmark/v0.0.2/64k-paired.json)
 
-On the test machines, we verified automatic selection of nine layers, first-time pairing, inference, and normal shutdown. The PC had 125.6 GiB of installed RAM and around 60.5 GiB of available WSL2 RAM at startup. The plan pinned 40.3 GiB of weights. Other hardware configurations and model transfers into an empty volume are unverified.
+The release uses the validated 11-layer path. Twelve layers still produce a numeric divergence, and the Expert GEMM candidates have only been measured in isolated real-input replay. These results apply to the hardware and model listed above.
+
+The packaged launcher paired successfully, automatically selected 11 layers, and matched the reference output on its first 64K request. An SSH disconnect triggered the memory guard on the second request, so the packaged run did not reproduce the performance measurements above.
 
 ## Setup
 
@@ -50,7 +50,7 @@ On the test machines, we verified automatic selection of nine layers, first-time
 
    In WSL, run `bash windows-helper/install.sh WINDOWS_WSL_GATEWAY_IPV4`. Review the forwarding and firewall addresses if the WSL network is reassigned.
 4. Open the app and choose **設定ファイルを開く** (Open Settings File). Fill in `pc_host` and `pc_user`, and optionally `ssh_key` and `ssh_host_key_alias`. Set `wsl_distribution` to the name of the distribution that hosts the helper. Set `omlx_python` to the venv interpreter from step 1, `model_directory` to the parent directory of the checkpoint, and `model_id` to the checkpoint directory name.
-5. Run the command below in Mac Terminal. Enter the six-digit code shown by `docker logs hybrid-prefill-helper` in WSL. The launcher saves `helper_node_id`.
+5. For a fresh installation, run the command below in Mac Terminal. Enter the six-digit code shown by `docker logs hybrid-prefill-helper` in WSL. The launcher saves `helper_node_id`.
 
    ```sh
    /usr/bin/python3 launcher/launch.py "$HOME/Library/Application Support/HybridPrefill/launcher.json" --pair
@@ -58,4 +58,8 @@ On the test machines, we verified automatic selection of nine layers, first-time
 
 6. Check free disk space on the PC and enable `copy_missing_model_files` if the helper needs to receive the model shards. Click **起動** (Start) and check the selected layer count and running status. Click **停止** (Stop) to shut down. The API is at `http://127.0.0.1:18880/v1` on the Mac, and the API key is stored in `state/settings.json` inside the settings directory.
 
-Set `max_layers` to cap the assignment within the 3–9 layer range. Model weights, SSH keys, API keys, and pairing state are supplied by each installation. The Mac app is an ad hoc-signed verification build.
+Set `max_layers` to cap the assignment within the 3–11 layer range. Model weights, SSH keys, API keys, and pairing state are supplied by each installation. The Mac app is an ad hoc-signed verification build.
+
+Set `reuse_pooled_kv` to `false` to return to the BF16 scratch path. The installer sets a 68 GiB limit for the dedicated helper container. Manage global WSL2 and Docker settings separately. The launcher monitors Windows commit headroom, Windows available RAM, and WSL2 available RAM.
+
+To upgrade from v0.0.1, stop the old helper and rename its container before running the included installer. The existing `hybrid-prefill-helper` data volume and Mac settings can be reused. Keep the old helper stopped while the new one runs.

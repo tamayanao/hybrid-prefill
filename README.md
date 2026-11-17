@@ -1,27 +1,27 @@
-# Hybrid Prefill v.0.0.1 検証テスト版
+# Hybrid Prefill v0.0.2 検証テスト版
 
-[English](README.en.md)
+[English](README.en.md) · [配布ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![実機構成とTTFT比較。Mac Studio (M3 Ultra 512GB) と RTX 5090 / DDR5 128GB 搭載PC。](docs/hybrid-prefill-ja.png)
+![Mac Studio M3 Ultra 512 GBとRTX 5090・DDR5 128 GBの分担構成、64KでのMac単体・9層・11層のTTFT](docs/hybrid-prefill-v0.0.2-ja.png)
 
-Mac Studio（M3 Ultra）とRTX 5090搭載Windows PCで、DeepSeek V4.1 Flashの入力処理（Prefill）を分担します。Macがモデル全体とKVキャッシュを保持し、RTX 5090が先頭の層を処理します。最初の3層はGPUに常駐し、追加の層のexpert重みはピン留めしたPC側のRAMからGPUへ転送します。
+DeepSeek V4.1 Flashの入力処理を、Mac StudioとRTX 5090搭載Windows PCで分担します。Macがモデル全体とKVキャッシュを保持して応答を生成し、RTXが先頭の層を処理します。最初の3層をGPUに常駐させ、追加層のExpert重みをWSL2のピン留めRAMから転送します。
 
-起動時にWindowsの搭載RAM、WSL2の総RAMと利用可能RAMを取得します。最小値から12 GiBを残し、チェックポイントのヘッダーから算出した重みサイズで3〜9層を選びます。既定のチャンク上限は2,048トークンです。8,192トークンに引き上げた試験ではVRAM不足により担当層が減りました。
+起動時にWindowsの搭載RAMとWSL2の総量・空き容量を読み取り、専用Helperの上限68 GiBも考慮します。12 GiBを確保し、チェックポイントから算出した重みサイズに応じて3〜11層を自動選択します。検証済みの高速構成は11層、32 Expert Bank、2,048トークンチャンク、全ピン留め、先読みOFFです。
 
 ## 実機計測
 
-| 入力トークン | 構成 | 最初のトークンまで（TTFT） |
-| --- | --- | ---: |
-| 8,405 | Mac単体、ウォームアップ後3回の中央値 | 9.920秒 |
-| 8,405 | 検証版ランチャー・9層、ウォームアップ後3回の中央値 | 6.522秒 |
-| 32,773 | 9層、予備測定1回 | 21.714秒 |
-| 65,541 | 9層、予備測定1回 | 42.590秒 |
+図のTTFTは同じ65,541トークンのプロンプトを使った別系列の実測です。Mac単体は8,192トークンチャンクで1回、9層と11層は2,048トークンチャンクで各5回の中央値です。[3構成のTTFT実測データ](benchmark/v0.0.2/64k-ttft-comparison.json)
 
-8,405トークンではTTFTが34.3%短縮しました。長文2条件は単発測定です。32,773トークンの出力は8層での試行と一致しませんでした。計測条件とデータは [benchmark](benchmark) にあります。
+| 65,541トークン・同一11層構成 | Prefill中央値 | TTFT中央値 | Prefill速度 |
+| --- | ---: | ---: | ---: |
+| BF16一時KV | 34.640秒 | 34.927秒 | 1,892.1 tok/s |
+| BF16一時KV＋pooled KV再利用 | **33.811秒** | **34.098秒** | **1,938.4 tok/s** |
 
-## 検証範囲
+Mac Studio（M3 Ultra・512 GB）、RTX 5090（32 GB VRAM）・DDR5 128 GB搭載PC、5GbE、WSL2上限96 GBで測定しました。各モードはウォームアップ1回と計測5回。全12試行で生成が一致し、全396チャンクが11層を維持しました。Windows計測中のコミット余裕は最低14.90 GiB、物理空きRAMは39.75 GiB、WSL2空きRAMは30.20 GiBでした。[計測データ](benchmark/v0.0.2/64k-paired.json)
 
-実機で9層の自動選択、初回ペアリング、推論、通常停止を確認しました。検証機は搭載RAM 125.6 GiB、起動時のWSL2利用可能RAMは約60.5 GiB、ピン留め重みは40.3 GiBでした。別の機材構成や、空ボリュームへのモデル転送は未検証です。
+配布版の実機試験では、Macランチャーからのペアリング、11層の自動選択、64K初回生成の参照一致を確認しました。2回目はSSH切断を検知して安全停止したため、表の性能値の再現は未確認です。
+
+11層を採用しました。12層は生成の数値差が残り、Expert GEMM候補は実入力の単体試験段階です。上記の結果は記載の機材・モデルでの検証値です。
 
 ## セットアップ
 
@@ -50,7 +50,7 @@ Mac Studio（M3 Ultra）とRTX 5090搭載Windows PCで、DeepSeek V4.1 Flashの�
 
    WSL内で `bash windows-helper/install.sh WINDOWS_WSL_GATEWAY_IPV4` を実行します。WSLのアドレスが変わった場合は転送先と接続元の指定を見直してください。
 4. Macアプリを開き、「設定ファイルを開く」を選びます。Windowsの `pc_host` と `pc_user`、必要に応じて `ssh_key`、`ssh_host_key_alias` を設定します。`wsl_distribution` は配置先の名前です。`omlx_python` は手順1の `omlx/.venv/bin/python`、`model_directory` はチェックポイントの親ディレクトリ、`model_id` はチェックポイント名です。
-5. MacのTerminalで以下を実行します。WSLの `docker logs hybrid-prefill-helper` に表示される6桁のコードを入力すると、`helper_node_id` が保存されます。
+5. 新規セットアップ時はMacのTerminalで以下を実行します。WSLの `docker logs hybrid-prefill-helper` に表示される6桁のコードを入力すると、`helper_node_id` が保存されます。
 
    ```sh
    /usr/bin/python3 launcher/launch.py "$HOME/Library/Application Support/HybridPrefill/launcher.json" --pair
@@ -58,4 +58,8 @@ Mac Studio（M3 Ultra）とRTX 5090搭載Windows PCで、DeepSeek V4.1 Flashの�
 
 6. 初回はモデルの必要なシャードを転送するため、Windows側の空きディスク容量を確認し、`copy_missing_model_files` を `true` にします。Macアプリで「起動」を押し、選ばれた層数と稼働中表示を確認します。終了は「停止」です。APIはMacの `http://127.0.0.1:18880/v1`、APIキーは設定ディレクトリ内の `state/settings.json` に保存されます。
 
-`max_layers` で上限を3〜9層の範囲で変更できます。モデル重み、SSH鍵、APIキー、ペアリング情報は利用環境ごとに用意します。Macアプリはローカル署名の検証ビルドです。
+`max_layers` で上限を3〜11層の範囲で変更できます。モデル重み、SSH鍵、APIキー、ペアリング情報は利用環境ごとに用意します。Macアプリはローカル署名の検証ビルドです。
+
+`reuse_pooled_kv` を `false` にするとBF16一時KVのみの経路に戻ります。専用Helperのインストール時に68 GiBのコンテナ上限を設定します。WSL2やDockerのグローバル設定は各環境で管理してください。ランチャーはWindowsのコミット余裕・物理空きRAMとWSL2空きRAMを監視します。
+
+v0.0.1から更新する場合は旧Helperを停止し、既存コンテナをリネームしてから同梱インストーラーを実行してください。既存の `hybrid-prefill-helper` データボリュームとMac側の設定を再利用できます。旧コンテナと新コンテナは同時に起動しないでください。

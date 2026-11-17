@@ -10,7 +10,8 @@ import struct
 GIB = 1 << 30
 RESERVE = 12 * GIB
 RESIDENT_LAYERS = 3
-MAX_VALIDATED_LAYERS = 9
+MAX_VALIDATED_LAYERS = 11
+HELPER_MEMORY = 68 * GIB
 _EXPERT = re.compile(r"^language_model\.layers\.(\d+)\.ffn\.experts\.(w1|w3|w2)\.(weight|scales)$")
 _EXPECTED = {(part, field) for part in ("w1","w3","w2") for field in ("weight","scales")}
 

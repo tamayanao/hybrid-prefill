@@ -6,11 +6,12 @@ if [[ $# != 1 || ! $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     exit 2
 fi
 name=hybrid-prefill-helper
-image="$name:0.0.1"
+image="$name:0.0.2"
 if docker container inspect "$name" >/dev/null 2>&1; then
     echo "Container $name already exists. Its state has been preserved." >&2
     exit 1
 fi
 docker build --platform linux/amd64 -t "$image" .
 docker create --gpus all --network host --name "$name" --label io.hybridprefill.package=1 \
+    --memory 68g --memory-swap 68g \
     -v "$name:/data" -e "HYBRID_PREFILL_PAIR_HOST=$1" "$image"

@@ -1,0 +1,44 @@
+{
+  "model": "DeepSeek-V4.1-Flash-1017-oQ4e-mtp",
+  "input_tokens": 65541,
+  "prompt_sha256": "bf447072b166f05c863f40e49ebb1b02daf3ec58114db451620434b0ee06b502",
+  "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+  "description": "Three independent benchmark series. The Mac-only result is a single pilot measurement. The 9-layer and 11-layer results exclude the warmup.",
+  "series": [
+    {
+      "configuration": "Mac only",
+      "rtx_layers": 0,
+      "chunk_tokens": 8192,
+      "ttft_seconds": [
+        74.72166983299999
+      ],
+      "median_ttft_seconds": 74.72166983299999
+    },
+    {
+      "configuration": "Hybrid",
+      "rtx_layers": 9,
+      "chunk_tokens": 2048,
+      "ttft_seconds": [
+        42.451623375,
+        42.429735707999995,
+        42.56938816599998,
+        42.556899375,
+        42.521324625000034
+      ],
+      "median_ttft_seconds": 42.521324625000034
+    },
+    {
+      "configuration": "Hybrid",
+      "rtx_layers": 11,
+      "chunk_tokens": 2048,
+      "ttft_seconds": [
+        34.02232641700539,
+        34.09762758300349,
+        34.10082620799949,
+        34.07565766699554,
+        34.118602292001015
+      ],
+      "median_ttft_seconds": 34.09762758300349
+    }
+  ]
+}

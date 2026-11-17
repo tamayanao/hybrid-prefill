@@ -1,0 +1,254 @@
+{
+  "summary": {
+    "control": {
+      "medians": {
+        "prefill_seconds": 34.63963700000022,
+        "ttft_seconds": 34.92719083299744,
+        "mac_forward_seconds": 33.010520461
+      },
+      "prefill_tok_s": 1892.0810284472548,
+      "max_mac_peak_gib": 406.43473321199417,
+      "max_rtx_peak_gib": 27.105660796165466
+    },
+    "reuse": {
+      "medians": {
+        "prefill_seconds": 33.81112087499787,
+        "ttft_seconds": 34.09762758300349,
+        "mac_forward_seconds": 32.17171325
+      },
+      "prefill_tok_s": 1938.4450531027871,
+      "max_mac_peak_gib": 406.4347331933677,
+      "max_rtx_peak_gib": 26.90997952222824
+    }
+  },
+  "per_pair": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "reuse_improvement_seconds": 4.1376093339931685
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "reuse_improvement_seconds": 0.8872207079984946
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "reuse_improvement_seconds": 0.8639856669979054
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "reuse_improvement_seconds": 0.8249389999982668
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "reuse_improvement_seconds": 0.890494375002163
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "reuse_improvement_seconds": 0.796120291997795
+    }
+  ],
+  "requests": {
+    "control": [
+      {
+        "mode": "control",
+        "pair": 0,
+        "warmup": true,
+        "ttft_seconds": 39.42559504100063,
+        "elapsed_seconds": 39.662178207996476,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 37.96793937499751,
+        "mac_forward_seconds": 35.196184041,
+        "mac_mlx_peak_gib": 405.14565954357386,
+        "rtx_mlx_peak_gib": 27.039254546165466
+      },
+      {
+        "mode": "control",
+        "pair": 1,
+        "warmup": false,
+        "ttft_seconds": 34.9079993750056,
+        "elapsed_seconds": 35.134263375002774,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 34.617987083001935,
+        "mac_forward_seconds": 33.001827373,
+        "mac_mlx_peak_gib": 406.4347331672907,
+        "rtx_mlx_peak_gib": 26.79813262820244
+      },
+      {
+        "mode": "control",
+        "pair": 2,
+        "warmup": false,
+        "ttft_seconds": 34.958788832998835,
+        "elapsed_seconds": 35.18412495800294,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 34.675106541995774,
+        "mac_forward_seconds": 33.012683875,
+        "mac_mlx_peak_gib": 406.434733171016,
+        "rtx_mlx_peak_gib": 27.105660796165466
+      },
+      {
+        "mode": "control",
+        "pair": 3,
+        "warmup": false,
+        "ttft_seconds": 34.92719083299744,
+        "elapsed_seconds": 35.15257699999347,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 34.63963700000022,
+        "mac_forward_seconds": 33.019990626,
+        "mac_mlx_peak_gib": 406.43473318219185,
+        "rtx_mlx_peak_gib": 26.762917764484882
+      },
+      {
+        "mode": "control",
+        "pair": 4,
+        "warmup": false,
+        "ttft_seconds": 34.97473304199957,
+        "elapsed_seconds": 35.1999993329955,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 34.684979459001624,
+        "mac_forward_seconds": 33.010520461,
+        "mac_mlx_peak_gib": 406.43473318591714,
+        "rtx_mlx_peak_gib": 26.762948282063007
+      },
+      {
+        "mode": "control",
+        "pair": 5,
+        "warmup": false,
+        "ttft_seconds": 34.913265374998446,
+        "elapsed_seconds": 35.13887437499943,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 34.62718750000204,
+        "mac_forward_seconds": 32.989257287,
+        "mac_mlx_peak_gib": 406.43473321199417,
+        "rtx_mlx_peak_gib": 26.90963113307953
+      }
+    ],
+    "reuse": [
+      {
+        "mode": "reuse",
+        "pair": 0,
+        "warmup": true,
+        "ttft_seconds": 34.11938949999603,
+        "elapsed_seconds": 34.34526658299728,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.830330041004345,
+        "mac_forward_seconds": 32.138728127,
+        "mac_mlx_peak_gib": 406.4347331598401,
+        "rtx_mlx_peak_gib": 26.76285684108734
+      },
+      {
+        "mode": "reuse",
+        "pair": 1,
+        "warmup": false,
+        "ttft_seconds": 34.02232641700539,
+        "elapsed_seconds": 34.24744262500462,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.73076637500344,
+        "mac_forward_seconds": 32.148579876,
+        "mac_mlx_peak_gib": 406.4347331635654,
+        "rtx_mlx_peak_gib": 26.90997952222824
+      },
+      {
+        "mode": "reuse",
+        "pair": 2,
+        "warmup": false,
+        "ttft_seconds": 34.09762758300349,
+        "elapsed_seconds": 34.322543791997305,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.81112087499787,
+        "mac_forward_seconds": 32.17171325,
+        "mac_mlx_peak_gib": 406.43473317474127,
+        "rtx_mlx_peak_gib": 26.762917771935463
+      },
+      {
+        "mode": "reuse",
+        "pair": 3,
+        "warmup": false,
+        "ttft_seconds": 34.10082620799949,
+        "elapsed_seconds": 34.32610512500105,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.814698000001954,
+        "mac_forward_seconds": 32.152100874,
+        "mac_mlx_peak_gib": 406.43473317846656,
+        "rtx_mlx_peak_gib": 26.762887358665466
+      },
+      {
+        "mode": "reuse",
+        "pair": 4,
+        "warmup": false,
+        "ttft_seconds": 34.07565766699554,
+        "elapsed_seconds": 34.30134383299446,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.79448508399946,
+        "mac_forward_seconds": 32.179140042,
+        "mac_mlx_peak_gib": 406.43473318964243,
+        "rtx_mlx_peak_gib": 26.884454131126404
+      },
+      {
+        "mode": "reuse",
+        "pair": 5,
+        "warmup": false,
+        "ttft_seconds": 34.118602292001015,
+        "elapsed_seconds": 34.34415112499846,
+        "output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+        "prompt_tokens": 65541,
+        "completion_tokens": 8,
+        "cached_tokens": 0,
+        "prefill_seconds": 33.83106720800424,
+        "mac_forward_seconds": 32.194565004,
+        "mac_mlx_peak_gib": 406.4347331933677,
+        "rtx_mlx_peak_gib": 26.84027737379074
+      }
+    ]
+  },
+  "actual_11_layer_chunks": 396,
+  "memory_shared_run": {
+    "mem_windows_startup_min_gib": 27.0029296875,
+    "mem_windows_benchmark_min_gib": 39.7529296875,
+    "windows_commit_remaining_startup_min_gib": 3.2009315490722656,
+    "windows_commit_remaining_benchmark_min_gib": 14.897987365722656,
+    "mem_wsl_min_gib": 30.20168685913086,
+    "wsl_swap_used_peak_gib": 0.0,
+    "cgroup_peak_gib": 68.0,
+    "driver_vram_peak_gib": 28.9140625
+  },
+  "observed_cgroup_oom_events": 0
+}

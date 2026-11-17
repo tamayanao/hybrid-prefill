@@ -21,7 +21,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text("Hybrid Prefill").font(.largeTitle.bold())
-                Text("v.0.0.1 検証テスト版").font(.callout).foregroundStyle(.secondary)
+                Text("v0.0.2 検証テスト版").font(.callout).foregroundStyle(.secondary)
             }
             Text("Mac StudioとRTX搭載PCでDeepSeekの入力処理を分担します。")
                 .foregroundStyle(.secondary)

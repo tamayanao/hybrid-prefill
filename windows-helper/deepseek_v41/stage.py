@@ -10,6 +10,7 @@ before it from the state of the stages before, as the host does after a cut.
 
 from __future__ import annotations
 
+import os
 import time
 from functools import partial
 from pathlib import Path
@@ -59,6 +60,11 @@ class Stage:
             ]
             mx.eval(self.embed)
 
+        # The host keeps the release's 32-slot VRAM reserve for this smaller
+        # bank experiment. Both the staging allocator and routing use the same size.
+        expert_slots = 16 if os.environ.get("HYBRID_PREFILL_EXPERT_BANK_16") == "1" else 32
+        mmap_layer_ten = os.environ.get("HYBRID_PREFILL_EXPERIMENTAL_LAYER10_MMAP") == "1"
+
         def load_block(layer: int) -> Block:
             names = [
                 name
@@ -77,14 +83,15 @@ class Stage:
                                 if any(name.startswith(bank + ".") for bank in banks)]
                 names = [name for name in names if name not in expert_names]
                 pinned = PinnedExpertWeights(
-                    HostExpertWeights(model_dir, expert_names, config.n_routed_experts), 32,
+                    HostExpertWeights(model_dir, expert_names, config.n_routed_experts), expert_slots,
                     staging=self._staging,
+                    pin_bank=not (mmap_layer_ten and layer == 9),
                 )
                 if self._staging is None:
                     self._staging = pinned
                 self._pinned[layer] = pinned
                 stream_experts = partial(run_routed, host_weights=pinned,
-                                         names=banks, config=config, slots=32)
+                                         names=banks, config=config, slots=expert_slots)
             else:
                 stream_experts = None
             try:

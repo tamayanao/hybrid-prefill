@@ -20,6 +20,7 @@ import time
 from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -399,6 +400,7 @@ class StageServer:
 
     def _run_chunks(self, session: _Session, job: _Job) -> None:
         report_metrics = os.environ.get("OMLX_CUDA_PREFILL_METRICS") == "1"
+        trace = os.environ.get("HYBRID_PREFILL_V41_TRACE") == "1"
         stage, upstream = self.stage, self.upstream
         if not job.fewer:
             # This host runs the layers it asked for on every chunk.
@@ -466,6 +468,8 @@ class StageServer:
                 # last rise once more.
                 expected = _Use(use.kept, use.passing + rise)
                 own = self._fit(job, state, own, size, expected)
+            memory_before = _require_prefill_memory() if trace else None
+            began_ns = time.perf_counter_ns() if trace else None
             began = time.perf_counter()
             if own:
                 held = stage.memory_bytes()
@@ -488,7 +492,9 @@ class StageServer:
                 if index == 0:
                     self._opening = use
             elapsed = time.perf_counter() - began
-            if own and report_metrics:
+            ended_ns = time.perf_counter_ns() if trace else None
+            memory_after = _require_prefill_memory() if trace else None
+            if own and (report_metrics or trace):
                 logger.info(
                     "prefill_chunk %s",
                     json.dumps({
@@ -502,6 +508,9 @@ class StageServer:
                         "device_bytes_before": held,
                         "device_bytes_after": kept,
                         "device_peak_bytes": kept + passing,
+                        **({"start_ns": began_ns, "end_ns": ended_ns,
+                            "wsl_mem_available_before_kib": memory_before,
+                            "wsl_mem_available_after_kib": memory_after} if trace else {}),
                     }, separators=(",", ":")),
                 )
             arrays.update({f"b:{n}": v for n, v in (boundary or {}).items()})
@@ -519,6 +528,19 @@ class StageServer:
             session.outbox.put((reply, arrays))
             start += size
         session.outbox.put(({"op": "done", "job_id": job.job_id}, None))
+
+
+def _require_prefill_memory():
+    """Abort a profiling run rather than continue below its safety floor."""
+    with Path("/proc/meminfo").open() as stream:
+        for line in stream:
+            if line.startswith("MemAvailable:"):
+                available_kib = int(line.split()[1])
+                if available_kib < 12 * 2**20:
+                    raise MemoryError("Prefill profiling requires 12 GiB WSL MemAvailable")
+                return available_kib
+    raise RuntimeError("Cannot verify WSL MemAvailable")
+
 
 
 def _listen(spec: str) -> tuple[socket.socket, int]:
