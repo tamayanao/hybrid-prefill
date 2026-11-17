@@ -1,0 +1,142 @@
+{
+  "conditions": {
+    "helper_image": "sha256:82f34e740a8cedc0aaabaf73e63b641d985ea1597e8e36a3fc31bbb6e85abd88",
+    "memory_limit": 73014444032,
+    "release_commit": "57f281fb55f7bd49048e8aecb057772e492078d3",
+    "engine_commit": "b98d23eab440d93f4c404fb3cc5e52c98304af2a",
+    "observed_utc": "2026-11-17T21:09:32Z",
+    "layers": 11,
+    "bank": 32,
+    "chunk_tokens": 2048,
+    "pooled_kv": true,
+    "bf16_scratch": true,
+    "prefetch": false,
+    "instrumentation": "Per-chunk timestamp/byte counters and one MLX peak-memory read per completed request",
+    "release_tree": "a4737893f4d2c28cc88ae5ec99d07746216e97e9"
+  },
+  "safety": {
+    "windows_startup_available_min_gib": 26.806640625,
+    "windows_startup_commit_headroom_min_gib": 4.155612945556641,
+    "all_chunks_11_layers": true,
+    "total_chunks": 330,
+    "total_generations": 18,
+    "all_reference_generations_match": true,
+    "oom_events": 0,
+    "swap_peak_gib": 0,
+    "shutdown": {
+      "launcher_exit": 0,
+      "helper_running": "false",
+      "guard_failed": false
+    }
+  },
+  "results": [
+    {
+      "prompt_tokens": 8405,
+      "warmups": 1,
+      "measured_trials": 5,
+      "prefill_seconds": {
+        "median": 5.484945709002204,
+        "p10": 5.44262859999435,
+        "p90": 5.580780941803823,
+        "minimum": 5.433776999998372,
+        "maximum": 5.6037621249997756
+      },
+      "ttft_seconds": {
+        "median": 5.584191375,
+        "p10": 5.542482591000002,
+        "p90": 5.679689808399997,
+        "minimum": 5.533043291,
+        "maximum": 5.702674791999996
+      },
+      "prefill_tokens_per_second": 1532.3761520930348,
+      "generation_matches": 6,
+      "reference_output_sha256": "63463a38723a935bf9fc912265accb6e3c91de2e69872c3702ea0f875bbdf38b",
+      "actual_layers": 11,
+      "chunks": 30,
+      "all_chunks_11_layers": true,
+      "mac_mlx_peak_gib": 406.29403453320265,
+      "rtx_mlx_peak_gib": null,
+      "rtx_mlx_peak_status": "Unavailable. Docker logs returned records from the previous run only; current driver VRAM samples are retained.",
+      "nvidia_total_vram_peak_gib": 28.599609375,
+      "wsl_available_min_gib": 36.50453567504883,
+      "windows_available_min_gib": 39.53515625,
+      "windows_commit_headroom_min_gib": 16.69180679321289,
+      "pinned_experts_gib": 53.7890625,
+      "pinned_experts_source": "Checkpoint safetensors headers: 8 streamed layers \u00d7 7,219,445,760 bytes",
+      "wsl_swap_peak_gib": 0.0,
+      "cgroup_peak_gib": 68.00000381469727
+    },
+    {
+      "prompt_tokens": 32773,
+      "warmups": 1,
+      "measured_trials": 5,
+      "prefill_seconds": {
+        "median": 17.30207175000396,
+        "p10": 17.245098941394826,
+        "p90": 17.394344525196356,
+        "minimum": 17.224672290991293,
+        "maximum": 17.398211541993078
+      },
+      "ttft_seconds": {
+        "median": 17.472663958999995,
+        "p10": 17.415043349999998,
+        "p90": 17.568558366400005,
+        "minimum": 17.394236,
+        "maximum": 17.571096416000003
+      },
+      "prefill_tokens_per_second": 1894.1662289657595,
+      "generation_matches": 6,
+      "reference_output_sha256": "63463a38723a935bf9fc912265accb6e3c91de2e69872c3702ea0f875bbdf38b",
+      "actual_layers": 11,
+      "chunks": 102,
+      "all_chunks_11_layers": true,
+      "mac_mlx_peak_gib": 406.4074504598975,
+      "rtx_mlx_peak_gib": null,
+      "rtx_mlx_peak_status": "Unavailable. Docker logs returned records from the previous run only; current driver VRAM samples are retained.",
+      "nvidia_total_vram_peak_gib": 28.693359375,
+      "wsl_available_min_gib": 35.7050666809082,
+      "windows_available_min_gib": 37.830078125,
+      "windows_commit_headroom_min_gib": 14.808292388916016,
+      "pinned_experts_gib": 53.7890625,
+      "pinned_experts_source": "Checkpoint safetensors headers: 8 streamed layers \u00d7 7,219,445,760 bytes",
+      "wsl_swap_peak_gib": 0.0,
+      "cgroup_peak_gib": 68.0000114440918
+    },
+    {
+      "prompt_tokens": 65541,
+      "warmups": 1,
+      "measured_trials": 5,
+      "prefill_seconds": {
+        "median": 33.865297750002355,
+        "p10": 33.72142728320614,
+        "p90": 33.91240025039296,
+        "minimum": 33.72057250000944,
+        "maximum": 33.932110583991744
+      },
+      "ttft_seconds": {
+        "median": 34.15306254199999,
+        "p10": 34.0068601248,
+        "p90": 34.2049146834,
+        "minimum": 34.002941457999995,
+        "maximum": 34.23055758299999
+      },
+      "prefill_tokens_per_second": 1935.3439761206719,
+      "generation_matches": 6,
+      "reference_output_sha256": "0fdb8609f7102727bd3d67d511706d0ea20ee2a2014f1296572ed4c80c225f69",
+      "actual_layers": 11,
+      "chunks": 198,
+      "all_chunks_11_layers": true,
+      "mac_mlx_peak_gib": 406.4347333647311,
+      "rtx_mlx_peak_gib": null,
+      "rtx_mlx_peak_status": "Unavailable. Docker logs returned records from the previous run only; current driver VRAM samples are retained.",
+      "nvidia_total_vram_peak_gib": 28.7578125,
+      "wsl_available_min_gib": 36.177886962890625,
+      "windows_available_min_gib": 37.4013671875,
+      "windows_commit_headroom_min_gib": 14.273200988769531,
+      "pinned_experts_gib": 53.7890625,
+      "pinned_experts_source": "Checkpoint safetensors headers: 8 streamed layers \u00d7 7,219,445,760 bytes",
+      "wsl_swap_peak_gib": 0.0,
+      "cgroup_peak_gib": 68.0000114440918
+    }
+  ]
+}

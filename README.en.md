@@ -2,7 +2,7 @@
 
 [日本語](README.md) · [Distribution ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![How the Mac Studio M3 Ultra 512 GB and RTX 5090 / DDR5 128 GB PC split work, with 64K TTFT for Mac only, 9 layers, and 11 layers](docs/hybrid-prefill-v0.0.2-en.png)
+![Measured v0.0.2 8K, 32K and 64K results with reference values from the supplied figure (Japanese)](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
 
 Hybrid Prefill splits DeepSeek V4.1 Flash prefill between a Mac Studio and a Windows PC with an RTX 5090. The Mac keeps the full model and KV cache and handles decoding. The RTX processes the first layers, keeping three resident and streaming the additional expert weights from pinned WSL2 RAM.
 
@@ -21,7 +21,7 @@ Measured on a Mac Studio (M3 Ultra, 512 GB) and an RTX 5090 PC (32 GB VRAM, 128 
 
 The release uses the validated 11-layer path. Twelve layers still produce a numeric divergence, and the Expert GEMM candidates have only been measured in isolated real-input replay. These results apply to the hardware and model listed above.
 
-The packaged launcher paired successfully, automatically selected 11 layers, and matched the reference output on its first 64K request. An SSH disconnect triggered the memory guard on the second request, so the packaged run did not reproduce the performance measurements above.
+The 2026-11-18 remeasurement completed one warm-up and five measured runs at each of 8K, 32K and 64K using the released v0.0.2 launcher and helper. All 18 outputs matched the reference, and all 330 chunks retained 11 layers. [Remeasurements and memory results](docs/v0.0.2-measured-20261118.en.md)
 
 ## Setup
 

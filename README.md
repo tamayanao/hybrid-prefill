@@ -2,7 +2,7 @@
 
 [English](README.en.md) · [配布ZIP](https://github.com/tamayanao/hybrid-prefill/raw/main/dist/Hybrid-Prefill-v0.0.2.zip)
 
-![Mac Studio M3 Ultra 512 GBとRTX 5090・DDR5 128 GBの分担構成、64KでのMac単体・9層・11層のTTFT](docs/hybrid-prefill-v0.0.2-ja.png)
+![v0.0.2の8K・32K・64K実測と元図の参考値との比較](docs/hybrid-prefill-comparison-v0.0.2-measured.png)
 
 DeepSeek V4.1 Flashの入力処理を、Mac StudioとRTX 5090搭載Windows PCで分担します。Macがモデル全体とKVキャッシュを保持して応答を生成し、RTXが先頭の層を処理します。最初の3層をGPUに常駐させ、追加層のExpert重みをWSL2のピン留めRAMから転送します。
 
@@ -19,7 +19,7 @@ DeepSeek V4.1 Flashの入力処理を、Mac StudioとRTX 5090搭載Windows PCで
 
 Mac Studio（M3 Ultra・512 GB）、RTX 5090（32 GB VRAM）・DDR5 128 GB搭載PC、5GbE、WSL2上限96 GBで測定しました。各モードはウォームアップ1回と計測5回。全12試行で生成が一致し、全396チャンクが11層を維持しました。Windows計測中のコミット余裕は最低14.90 GiB、物理空きRAMは39.75 GiB、WSL2空きRAMは30.20 GiBでした。[計測データ](benchmark/v0.0.2/64k-paired.json)
 
-配布版の実機試験では、Macランチャーからのペアリング、11層の自動選択、64K初回生成の参照一致を確認しました。2回目はSSH切断を検知して安全停止したため、表の性能値の再現は未確認です。
+2026-11-18の再試験では、公開v0.0.2のランチャーとHelperを使用し、8K・32K・64Kを各ウォームアップ1回と本計測5回で完走しました。全18試行で参照生成が一致し、全330チャンクで11層を維持しました。[追加実測とメモリ記録](docs/v0.0.2-measured-20261118.md)
 
 11層を採用しました。12層は生成の数値差が残り、Expert GEMM候補は実入力の単体試験段階です。上記の結果は記載の機材・モデルでの検証値です。
 

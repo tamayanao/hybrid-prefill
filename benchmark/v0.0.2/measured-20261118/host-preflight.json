@@ -1,0 +1,9 @@
+{
+  "PhysicalTotalKiB": 131713824,
+  "PhysicalFreeKiB": 115364104,
+  "CommittedBytes": 18282450944,
+  "CommitLimit": 143464890368,
+  "wsl_config": "[wsl2]\r\nmemory=96GB\r\n",
+  "strata_disabled": true,
+  "running_other_containers": 0
+}
