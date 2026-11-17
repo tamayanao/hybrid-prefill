@@ -1,0 +1,29 @@
+name: Publish Hybrid Prefill v0.0.2
+on:
+  push:
+    branches: [publish/v0.0.2]
+permissions:
+  contents: write
+concurrency: publish-v0.0.2
+jobs:
+  publish:
+    if: github.repository == 'tamayanao/hybrid-prefill'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the tested package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init release-files
+          cd release-files
+          git fetch --depth=2 "https://github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}"
+          git checkout --detach FETCH_HEAD
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = .github/workflows/publish-v0.0.2.yml
+          release_commit=$(git rev-parse HEAD^)
+          (cd dist && sha256sum --check Hybrid-Prefill-v0.0.2.zip.sha256)
+          gh release create v0.0.2 --repo "$GITHUB_REPOSITORY" \
+            dist/Hybrid-Prefill-v0.0.2.zip dist/Hybrid-Prefill-v0.0.2.zip.sha256 \
+            docs/hybrid-prefill-v0.0.2-ja.png docs/hybrid-prefill-v0.0.2-en.png \
+            --target "$release_commit" --title 'Hybrid Prefill v0.0.2' \
+            --prerelease --notes-file docs/release-v0.0.2.md
